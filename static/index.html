@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Speed Test | Koyeb</title>
+
+        <style>
+            :root {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+                    "Helvetica Neue", sans-serif;
+                font-size: 14px;
+            }
+
+            .container {
+                max-width: 500px;
+                width: 100%;
+                height: 70vh;
+                margin: 15vh auto;
+            }
+
+            #log {
+                width: calc(100% - 24px);
+                height: 20em;
+                overflow: auto;
+                margin: 0.5em 0;
+                padding: 12px;
+
+                border: 1px solid black;
+                border-radius: 12px;
+
+                font-family: monospace;
+                background-color: black;
+            }
+
+            #title {
+                float: left;
+                margin: 12px 0;
+            }
+
+            #start {
+                float: right;
+                margin: 12px 0;
+
+                background-color: black;
+                color: white;
+                font-size: 18px;
+                padding: 4px 8px;
+                border-radius: 4px;
+                border: none;
+            }
+
+            #start:disabled,
+            #start[disabled] {
+                background-color: rgb(63, 63, 63);
+                color: lightgray;
+            }
+
+            .msg {
+                margin: 0;
+                padding: 0.25em 0.5em;
+                color: white;
+            }
+
+            .msg--bad {
+                color: lightcoral;
+            }
+
+            .msg--success, .msg--good {
+                color: lightgreen;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div>
+                <h1 id="title">Speed Test</h1>
+                <button id="start">start</button>
+            </div>
+            <div id="log"></div>
+            <div>
+                <p>Powered by <a href="https://www.koyeb.com/" target="_blank"> Koyeb</a>.</p>
+            </div>
+        </div>
+
+        <script>
+            const $startButton = document.querySelector("#start");
+            const $log = document.querySelector("#log");
+            const average = (array) =>
+                array.reduce((a, b) => a + b) / array.length;
+            const totalTests = 10;
+            let startTime,
+                endTime,
+                testResults = [];
+
+            /** @type {WebSocket | null} */
+            var socket = null;
+
+            function log(msg, type = "status") {
+                $log.innerHTML += `<p class="msg msg--${type}">${msg}</p>`;
+                $log.scrollTop += 1000;
+            }
+
+            function start() {
+                complete();
+
+                const { location } = window;
+
+                const proto = location.protocol.startsWith("https")
+                    ? "wss"
+                    : "ws";
+                const wsUri = `${proto}://${location.host}/ws`;
+                let testsRun = 0;
+
+                log("Starting...");
+                socket = new WebSocket(wsUri);
+
+                socket.onopen = () => {
+                    log("Started.");
+                    updateTestStatus();
+                    testsRun++;
+                    startTime = performance.now();
+                    socket.send("start");
+                };
+
+                socket.onmessage = (ev) => {
+                    endTime = performance.now();
+                    log(`Completed Test: ${testsRun}/${totalTests}. Took ${endTime - startTime} milliseconds.`);
+                    testResults.push(endTime - startTime);
+
+                    if (testsRun < totalTests) {
+                        testsRun++;
+                        startTime = performance.now();
+                        socket.send("start");
+                    } else complete();
+                };
+
+                socket.onclose = () => {
+                    log("Finished.", "success");
+                    socket = null;
+                    updateTestStatus();
+                };
+            }
+
+            function complete() {
+                if (socket) {
+                    log("Cleaning up...");
+                    socket.close();
+                    socket = null;
+
+                    let testAverage = average(testResults) / 1000;
+                    let mbps = 10 / testAverage;
+
+                    let status;
+                    if (mbps < 10) status = "bad"
+                    else if (mbps < 50) status = ""
+                    else status = "good";
+
+                    log(`Average speed: ${mbps.toFixed(2)} MB/s or ${(mbps * 8).toFixed(2)} Mbps`, status);
+
+                    updateTestStatus();
+                }
+            }
+
+            function updateTestStatus() {
+                if (socket) {
+                    $startButton.disabled = true;
+                    $startButton.innerHTML = "Running";
+                } else {
+                    $startButton.disabled = false;
+                    $startButton.textContent = "Start";
+                }
+            }
+
+            $startButton.addEventListener("click", () => {
+                if (socket) complete();
+                else start();
+
+                updateTestStatus();
+            });
+
+            updateTestStatus();
+            log('Click "Start" to begin.');
+        </script>
+    </body>
+</html>
