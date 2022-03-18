@@ -1,10 +1,10 @@
 [package]
-name = "websocket"
+name = "koyeb-fast-com"
 version = "1.0.0"
 edition = "2021"
 
 [[bin]]
-name = "websocket-server"
+name = "koyeb-fast-com-server"
 path = "src/main.rs"
 
 [dependencies]
