@@ -4,7 +4,7 @@
 
 For those unfamiliar with [fast.com](https://fast.com/), go check it out! It's a dead simple speed test site created by Netflix that allows you to test your network connection speed.
 
-In this tutorial, we will build a fast.com clone using Rust Actix, WebSockets, and a simple JavaScript client. So, you can test the performance of your network connection using your very own speed test site hosted on Koyeb.
+In this tutorial, we will build a fast.com clone using Rust Actix, WebSockets, and a simple JavaScript client. Then we will Dockerize it and add it to the GitHub container registry to deploy it to Koyeb. By the end of this tutorial you will be able to test the performance of your network connection using your very own speed test site hosted on Koyeb.
 
 Without further ado, let's get started!
 
@@ -13,8 +13,10 @@ Without further ado, let's get started!
 To follow this guide, you will need:
 
 -   A local development environment with Rust installed
--   A [GitHub account](https://github.com/) to version and deploy your application code on Koyeb
+-   A [GitHub account](https://github.com/) o store our Docker image on the GitHub container registry
 -   A [Koyeb account](https://www.koyeb.com) to deploy and run the Rust Actix server
+-   [Docker](https://docs.docker.com/get-docker/) installed on your machine
+-   To have [configured Docker for use with GitHub Packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-docker-registry)
 
 ## Steps
 
@@ -307,9 +309,11 @@ Now, we can create a client that can send text to the server and receive the tes
 
 ```html
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
         <title>Speed Test | Koyeb</title>
 
         <style>
@@ -534,11 +538,101 @@ Nice, now our client is complete. It looks a bit overwhelming, but it's not. All
 
 ## Deploying to Koyeb
 
-TODO - Couldn't get it working.
+For deployment, we'll be using Docker. Docker is a lightweight containerization tool that allows us to run our server in a container.
+
+To Dockerize our server, let's create a simple `Dockerfile` in the root our the project directory. Add the following to it:
+
+```dockerfile
+FROM rust:1.59.0
+
+WORKDIR /usr/src/koyeb-fast-com
+COPY . .
+
+RUN cargo install --path .
+
+EXPOSE 8080
+
+CMD ["koyeb-fast-com-server"]
+```
+
+For consistency, name the working directory after the package name in the `Cargo.toml` file. In our case it's `koyeb-fast-com`.
+
+Let's break down what this file is doing. When we build the Docker image, it will download an official existing image for Rust, create the working directory and copy all of our project files into said directory. Then it will run the `cargo install` command to install all of our dependencies and expose port 8080.
+
+The last and most important part is that it will run the `koyeb-fast-com-server` command to start the server. We'll need to define this command in the `Cargo.toml` file:
+
+```toml
+[package]
+name = "koyeb-fast-com"
+version = "1.0.0"
+edition = "2021"
+
+[[bin]]
+name = "koyeb-fast-com-server"
+path = "src/main.rs"
+
+[dependencies]
+(* ... *)
+```
+
+The last thing we must do to ensure our project works in the Docker container is to change the bind address in `src/main.rs` to `0.0.0.0` instead of `127.0.0.1`:
+
+```rust
+// ...
+HttpServer::new(|| {
+    App::new()
+        .service(web::resource("/").to(index))
+        .service(web::resource("/ws").route(web::get().to(echo_ws)))
+        .wrap(middleware::Logger::default())
+})
+.workers(2)
+.bind(("0.0.0.0", 8080))? // Change bind address to 0.0.0.0
+.run()
+.await
+// ...
+```
+
+Now let's build an image for our project:
+
+```bash
+docker build . -t ghcr.io/<YOUR_GITHUB_USERNAME>/koyeb-fast-com
+```
+
+We can see if it runs by running the following command:
+
+```bash
+docker run -p 8080:8080 ghcr.io/<YOUR_GITHUB_USERNAME>/my-project
+```
+
+Now that we know our project runs in the container, let's push it to the registry:
+
+```bash
+docker push ghcr.io/<YOUR_GITHUB_USERNAME>/my-project
+```
+
+It's now time to deploy our container image on Koyeb. On the Koyeb Control Panel, click the "Create App" button.
+
+In the form, fill the Docker image field with the name of the image we previously created which should look like ghcr.io/<YOUR_GITHUB_USERNAME>/my-project.
+
+Check the box "Use a private registry" and, in the select field, click "Create Registry Secret."
+
+A modal opens asking for:
+
+-   A name for this new Secret (e.g. gh-registry-secret)
+-   The registry provider to generate the secret containing your private registry credentials. In our case GitHub.
+-   Your GitHub username and a valid GitHub token having registry read/write permissions (for packages) as  
+    password. You can create one here: [github.com/settings/tokens](https://github.com/settings/tokens)
+-   Once you've filled all the fields, click the Create button.
+
+Name your app and then click the "Create App" button. You will automatically be redirected to the Koyeb App page where you can follow the progress of your application's deployment.
+
+In a matter seconds, once your app is deployed, click on the Public URL ending with `koyeb.app`. You should see your speed test site in action!
+
+For a demo, click here: [speedtest-ceiphr.koyeb.app](https://speedtest-ceiphr.koyeb.app/).
 
 ## Conclusion
 
-You now have your very own speed test site written in Rust and hosted on Koyeb. With Koyeb's git-driven deployment, a new build and deployment for this application is triggered each time you push changes to your GitHub repository. So, if you ever decide to add additional features or make the tests more robust, you can simply push your changes to GitHub and Koyeb will automatically update your site.
+You now have your very own speed test site written in Rust, Dockerized, and hosted on Koyeb. With Koyeb's container-based deployment, anytime you push a new image to GitHub, just redeploy on Koyeb and you're done. So, if you ever decide to add additional features or make the tests more robust, you can simply push your changes to GitHub and deploy!
 
 If you'd like to learn more about Rust and Actix, check out [actix/examples](https://github.com/actix/examples/tree/master/websockets) and [actix-web](https://github.com/actix/actix-web). This article was actually based off the echo example from Actix, found [here](https://github.com/actix/examples/tree/master/websockets/echo).
 

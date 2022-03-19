@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
         <title>Speed Test | Koyeb</title>
 
         <style>
@@ -66,7 +68,8 @@
                 color: lightcoral;
             }
 
-            .msg--success, .msg--good {
+            .msg--success,
+            .msg--good {
                 color: lightgreen;
             }
         </style>
@@ -79,7 +82,10 @@
             </div>
             <div id="log"></div>
             <div>
-                <p>Powered by <a href="https://www.koyeb.com/" target="_blank"> Koyeb</a>.</p>
+                <p>
+                    Powered by
+                    <a href="https://www.koyeb.com/" target="_blank"> Koyeb</a>.
+                </p>
             </div>
         </div>
 
@@ -125,7 +131,11 @@
 
                 socket.onmessage = (ev) => {
                     endTime = performance.now();
-                    log(`Completed Test: ${testsRun}/${totalTests}. Took ${endTime - startTime} milliseconds.`);
+                    log(
+                        `Completed Test: ${testsRun}/${totalTests}. Took ${
+                            endTime - startTime
+                        } milliseconds.`
+                    );
                     testResults.push(endTime - startTime);
 
                     if (testsRun < totalTests) {
@@ -152,11 +162,16 @@
                     let mbps = 10 / testAverage;
 
                     let status;
-                    if (mbps < 10) status = "bad"
-                    else if (mbps < 50) status = ""
+                    if (mbps < 10) status = "bad";
+                    else if (mbps < 50) status = "";
                     else status = "good";
 
-                    log(`Average speed: ${mbps.toFixed(2)} MB/s or ${(mbps * 8).toFixed(2)} Mbps`, status);
+                    log(
+                        `Average speed: ${mbps.toFixed(2)} MB/s or ${(
+                            mbps * 8
+                        ).toFixed(2)} Mbps`,
+                        status
+                    );
 
                     updateTestStatus();
                 }
