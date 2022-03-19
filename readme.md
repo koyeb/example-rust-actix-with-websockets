@@ -540,7 +540,7 @@ Nice, now our client is complete. It looks a bit overwhelming, but it's not. All
 
 For deployment, we'll be using Docker. Docker is a lightweight containerization tool that allows us to run our server in a container.
 
-To Dockerize our server, let's create a simple `Dockerfile` in the root our the project directory. Add the following to it:
+To Dockerize our server, let's create a simple `Dockerfile` in the root of our the project directory. Add the following to it:
 
 ```dockerfile
 FROM rust:1.59.0
@@ -555,7 +555,7 @@ EXPOSE 8080
 CMD ["koyeb-fast-com-server"]
 ```
 
-For consistency, name the working directory after the package name in the `Cargo.toml` file. In our case it's `koyeb-fast-com`.
+For consistency, name the working directory after the package name in the `Cargo.toml` file. In our case, it's `koyeb-fast-com`.
 
 Let's break down what this file is doing. When we build the Docker image, it will download an official existing image for Rust, create the working directory and copy all of our project files into said directory. Then it will run the `cargo install` command to install all of our dependencies and expose port 8080.
 
@@ -612,27 +612,27 @@ docker push ghcr.io/<YOUR_GITHUB_USERNAME>/my-project
 
 It's now time to deploy our container image on Koyeb. On the Koyeb Control Panel, click the "Create App" button.
 
-In the form, fill the Docker image field with the name of the image we previously created which should look like ghcr.io/<YOUR_GITHUB_USERNAME>/my-project.
+In the form, fill the Docker image field with the name of the image we previously created, which should look like `ghcr.io/<YOUR_GITHUB_USERNAME>/my-project`.
 
 Check the box "Use a private registry" and, in the select field, click "Create Registry Secret."
 
 A modal opens asking for:
 
 -   A name for this new Secret (e.g. gh-registry-secret)
--   The registry provider to generate the secret containing your private registry credentials. In our case GitHub.
+-   The registry provider to generate the secret containing your private registry credentials. In our case, GitHub.
 -   Your GitHub username and a valid GitHub token having registry read/write permissions (for packages) as  
     password. You can create one here: [github.com/settings/tokens](https://github.com/settings/tokens)
 -   Once you've filled all the fields, click the Create button.
 
-Name your app and then click the "Create App" button. You will automatically be redirected to the Koyeb App page where you can follow the progress of your application's deployment.
+Name your app and then click the "Create App" button. You will automatically be redirected to the Koyeb App page, where you can follow the progress of your application's deployment.
 
-In a matter seconds, once your app is deployed, click on the Public URL ending with `koyeb.app`. You should see your speed test site in action!
+In a matter of seconds, once your app is deployed, click on the Public URL ending with `koyeb.app`. You should see your speed test site in action!
 
 For a demo, click here: [speedtest-ceiphr.koyeb.app](https://speedtest-ceiphr.koyeb.app/).
 
 ## Conclusion
 
-You now have your very own speed test site written in Rust, Dockerized, and hosted on Koyeb. With Koyeb's container-based deployment, anytime you push a new image to GitHub, just redeploy on Koyeb and you're done. So, if you ever decide to add additional features or make the tests more robust, you can simply push your changes to GitHub and deploy!
+You now have your very own speed test site written in Rust, Dockerized, and hosted on Koyeb. With Koyeb's container-based deployment, anytime you push a new image to GitHub, just redeploy on Koyeb, and you're done. So, if you ever decide to add additional features or make the tests more robust, you can simply push your changes to GitHub and deploy!
 
 If you'd like to learn more about Rust and Actix, check out [actix/examples](https://github.com/actix/examples/tree/master/websockets) and [actix-web](https://github.com/actix/actix-web). This article was actually based off the echo example from Actix, found [here](https://github.com/actix/examples/tree/master/websockets/echo).
 
