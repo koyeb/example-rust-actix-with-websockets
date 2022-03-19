@@ -559,6 +559,14 @@ For consistency, name the working directory after the package name in the `Cargo
 
 Let's break down what this file is doing. When we build the Docker image, it will download an official existing image for Rust, create the working directory and copy all of our project files into said directory. Then it will run the `cargo install` command to install all of our dependencies and expose port 8080.
 
+A small thing that might help build times is to create a `.dockerignore` file in the root of the project directory. Add the following to it:
+
+```dockerignore
+target
+```
+
+This way, when we build the Docker image, it will ignore the `target` directory, which is where the `cargo build` command creates the final executable.
+
 The last and most important part is that it will run the `koyeb-fast-com-server` command to start the server. We'll need to define this command in the `Cargo.toml` file:
 
 ```toml
