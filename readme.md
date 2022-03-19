@@ -18,6 +18,16 @@ To follow this guide, you will need:
 
 ## Steps
 
+To build our speed test site and deploy it on Koyeb, you will need to follow these steps:
+
+-   [Getting Started](#getting-started)
+-   [A Basic Web Server with Actix](#a-basic-web-server-with-actix)
+-   [Working with WebSockets using Actix](#working-with-websockets-using-actix)
+-   [Sending The Test File](#sending-the-test-file)
+-   [Creating The Speed Test Client](#creating-the-speed-test-client)
+-   [Deploying to Koyeb](#deploying-to-koyeb)
+-   [Conclusion](#conclusion)
+
 ## Getting Started
 
 To start, let's create a new rust project:
@@ -60,17 +70,16 @@ Let's populate the `src` directory with the following files:
 touch src/main.rs src/server.rs
 ```
 
-`main.rs` will be where we initialize and run the server. `server.rs` will be where we define our server logic. Specifically, the WebSocket functionality.
+`main.rs` will be where we initialize and run the server. `server.rs` will be where we define our server logic. Specifically, the WebSocket functionality for performing the speed test.
 
 In the `static` directory, let's create an `index.html` file and a 10 MB file that we'll send over the network to test the connection speed:
-
 
 ```bash
 touch static index.html
 dd if=/dev/zero of=static/10mb bs=1M count=10
 ```
 
-That second command is creating a file that is 10 megabytes of null characters. This way, we know exactly how much data we're sending over the network for calculating the connection speed later.
+That second command is creating a file that is roughly 10 megabytes of null characters. This way, we know exactly how much data we're sending over the network for calculating the connection speed later.
 
 Our directory structure looks like this:
 
@@ -91,8 +100,8 @@ Awesome! Our project is looking good. Let's start building our server.
 
 Actix is a high-performance web framework for Rust. It is a framework that provides a simple, yet powerful, way to build web applications. In our case, we'll be using it for two things:
 
-1. Serving HTML to users -- this will be for the main page of our application. It is how users will start the speed test and see the results.
-2. Serving test files over a WebSocket connection -- this will be for performing the speed test.
+1. Serving HTML to users; This will be for the main page of our application. It is how users will start the speed test and see the results.
+2. Serving test files over a WebSocket connection; This will be for performing the speed test.
 
 In `src/main.rs`, let's create a basic web server that will serve the `index.html` file from the `static` folder:
 
@@ -100,6 +109,7 @@ In `src/main.rs`, let's create a basic web server that will serve the `index.htm
 use actix_files::NamedFile;
 use actix_web::{middleware, web, App, Error, HttpServer, Responder};
 
+// This function will get the `index.html` file to serve to the user.
 async fn index() -> impl Responder {
     NamedFile::open_async("./static/index.html").await.unwrap()
 }
@@ -110,8 +120,10 @@ async fn main() -> std::io::Result<()> {
 
     log::info!("starting HTTP server at http://localhost:8080");
 
+    // Here we're creating the server and binding it to port 8080.
     HttpServer::new(|| {
         App::new()
+            // "/" is the path that we want to serve the `index.html` file from.
             .service(web::resource("/").to(index))
             .wrap(middleware::Logger::default())
     })
@@ -124,7 +136,7 @@ async fn main() -> std::io::Result<()> {
 
 In this case, anytime someone accesses the `/` URL, we will serve the `index.html` file from the `static` folder using the `index()` function. The `index()` function gets the file using the `NamedFile` struct and then returns it to the caller.
 
-## Working with WebSockets with Actix
+## Working with WebSockets using Actix
 
 Now we're going to start working with WebSockets. We'll be using the `actix-web-actors` crate to handle them. The socket logic will have to do the following:
 
@@ -271,8 +283,8 @@ Going to the browser and typing in `http://localhost:8080` should show a blank i
 
 ## Sending The Test File
 
-Currently, when a client sends text to the server, through the WebSocket, we're echoing it back to the client.
-But, we aren't concerned with the text that is sent over the socket. Whatever the client sends, we'll respond with the test file. So, let's update the `Text` case in the `handle()` function to do that:
+Currently, if a client were to send text to the server, through the WebSocket, we'd echo it back to them.
+But, we aren't concerned with the text that is sent over the socket. Whatever the client sends, we'll respond with the test file, since that's the sole purpose of our server. So, let's update the `Text` case in the `handle()` function to do that:
 
 ```rust
 // ...
@@ -289,7 +301,7 @@ Ok(ws::Message::Text(_)) => {
 
 Now, whenever a client sends text to the server through the WebSocket, we'll write the 10mb file to a buffer and send that to the client as binary data.
 
-## Creating the speed test client
+## Creating The Speed Test Client
 
 Now, we can create a client that can send text to the server and receive the test file as a response. Open up `static/index.html` and add the following:
 
@@ -522,7 +534,7 @@ Nice, now our client is complete. It looks a bit overwhelming, but it's not. All
 
 ## Deploying to Koyeb
 
-TODO
+TODO - Couldn't get it working.
 
 ## Conclusion
 
