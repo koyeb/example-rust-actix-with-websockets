@@ -4,7 +4,7 @@
   </a>
   <h3 align="center">Koyeb Serverless Platform</h3>
   <p align="center">
-    Deploy a Rust speed test usin on Koyeb
+    Deploy a Rust speed test using Actix and WebSockets on Koyeb
     <br />
     <a href="https://koyeb.com">Learn more about Koyeb</a>
     ·
