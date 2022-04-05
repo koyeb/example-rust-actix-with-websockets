@@ -37,7 +37,7 @@ If you want to customize and enhance this application, you need to fork this rep
 On the [Koyeb Control Panel](//app.koyeb.com/apps), click the **Create App** button to go to the App creation page.
 
 1. Name your application.
-2. Select Docker for the deployment method and fill the Docker image field with the name of the image we previously created, which should look like `ghcr.io/<YOUR_GITHUB_USERNAME>/koyeb-fast-com`.
+2. Select Docker for the deployment method and fill the Docker image field with the name of the image we previously created, which should look like `ghcr.io/<YOUR_GITHUB_USERNAME>/koyeb-speed-test`.
 3. Check the box "Use a private registry" and, in the select field, click "Create Registry Secret." A modal opens asking for:
     -   A name for this new Secret (e.g. gh-registry-secret)
     -   The type of registry provider to simplify generating the Koyeb Secret containing your private registry credentials. In our case, GitHub.
