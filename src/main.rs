@@ -2,6 +2,8 @@
 //!
 //! Open `http://localhost:8080/` in browser to test.
 
+use std::env;
+
 use actix_files::NamedFile;
 use actix_web::{middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder};
 use actix_web_actors::ws;
@@ -26,7 +28,12 @@ async fn echo_ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse,
 async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-    log::info!("starting HTTP server at http://0.0.0.0:8080");
+    let port: u16 = env::var("PORT")
+        .unwrap_or("8080".to_string())
+        .parse::<u16>()
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
+
+    log::info!("starting HTTP server at http://0.0.0.0:{}", port);
 
     HttpServer::new(|| {
         App::new()
@@ -39,7 +46,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
     })
     .workers(2)
-    .bind(("0.0.0.0", 8080))?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }
