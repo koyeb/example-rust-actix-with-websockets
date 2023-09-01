@@ -1,4 +1,4 @@
-FROM rust:1.70.0
+FROM rust:1.72.0
 
 WORKDIR /usr/src/koyeb-fast-com
 COPY . .
