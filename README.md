@@ -34,16 +34,16 @@ You need a Koyeb account to successfully deploy and run this application. If you
 
 If you want to customize and enhance this application, you need to fork this repository.
 
-On the [Koyeb Control Panel](//app.koyeb.com/apps), click the **Create App** button to go to the App creation page.
+On the [Koyeb Control Panel](//app.koyeb.com/apps), on the **Overview** tab, click the **Create Web Service** button to begin.
 
-1. Name your application.
-2. Select Docker for the deployment method and fill the Docker image field with the name of the image we previously created, which should look like `ghcr.io/<YOUR_GITHUB_USERNAME>/koyeb-speed-test`.
-3. Check the box "Use a private registry" and, in the select field, click "Create Registry Secret." A modal opens asking for:
-    -   A name for this new Secret (e.g. gh-registry-secret)
-    -   The type of registry provider to simplify generating the Koyeb Secret containing your private registry credentials. In our case, GitHub.
-    -   Your GitHub username and a valid GitHub token having registry read/write permissions (for packages) as the password. You can create one here: [github.com/settings/tokens](https://github.com/settings/tokens)
-    -   Once you've filled all the fields, click the "Create" button.
-4. Name your service, for example 'main', and then click the "Create Service" button. 
+1. Choose **Docker** as the deployment method.
+2. Fill in the **Docker image** field with the name of the image we previously created, which should look like `ghcr.io/<YOUR_GITHUB_USERNAME>/koyeb-speed-test`.
+3. Click the **Private image** toggle and select **Create secret**.  In the form that appears, fill out the following:
+    -   A name for this new Secret (e.g. `gh-registry-secret`).
+    -   The type of registry provider to simplify generating the Koyeb Secret containing your private registry credentials. In our case, **GitHub**.
+    -   Your GitHub username and a valid GitHub token having registry read/write permissions (for packages) as the password. You can create one here: [github.com/settings/tokens](https://github.com/settings/tokens).
+    -   Once you've filled all the fields, click the **Create** button.
+4. Choose a name for your App and Service, for example `rust-actix`, and click **Deploy**.
 
 You land on the deployment page where you can follow the build of your application. Once the build is completed, your application is being deployed and you will be able to access it via `<YOUR_APP_NAME>-<YOUR_ORG_NAME>.koyeb.app`.
 
