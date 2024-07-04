@@ -34,7 +34,7 @@ You need a Koyeb account to successfully deploy and run this application. If you
 
 If you want to customize and enhance this application, you need to fork this repository.
 
-On the [Koyeb Control Panel](//app.koyeb.com/apps), on the **Overview** tab, click the **Create Web Service** button to begin.
+On the [Koyeb Control Panel](https://app.koyeb.com/), on the **Overview** tab, click the **Create Web Service** button to begin.
 
 1. Choose **Docker** as the deployment method.
 2. Fill in the **Docker image** field with the name of the image we previously created, which should look like `ghcr.io/<YOUR_GITHUB_USERNAME>/koyeb-speed-test`.
